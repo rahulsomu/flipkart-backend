@@ -1,5 +1,6 @@
 import express from "express";
 import userModel from "../models/user-model.js";
+import passwordHash from "password-hash";
 
 const userRoutes = express.Router();
 userRoutes.get("/details", (req, res) => {
@@ -9,12 +10,13 @@ userRoutes.get("/details", (req, res) => {
 userRoutes.post("/login", async (req, res) => {
   const loginDetails = req.body;
   console.log(loginDetails);
+
   const userExist = await userModel.find({ email: loginDetails.email });
   console.log(userExist);
   if (userExist.length) {
     if (
       userExist[0].email == loginDetails.email &&
-      userExist[0].password == loginDetails.password
+      passwordHash.verify(loginDetails.password, userExist[0].password)
     ) {
       res.status(200).json({
         message: "Login SuccessFull",
@@ -34,6 +36,8 @@ userRoutes.post("/login", async (req, res) => {
 
 userRoutes.post("/register", async (req, res) => {
   const registrationDetails = req.body;
+  var hashedPassword = passwordHash.generate(registrationDetails.password);
+  console.log("hashedPassword", hashedPassword);
   const userExist = await (
     await userModel.find({ email: registrationDetails.email })
   ).length;
@@ -43,7 +47,10 @@ userRoutes.post("/register", async (req, res) => {
     });
   } else {
     try {
-      const newUser = new userModel(registrationDetails);
+      const newUser = new userModel({
+        ...registrationDetails,
+        password: hashedPassword,
+      });
       await newUser.save();
       res.status(200).json({
         message: "User Registered Successfully",

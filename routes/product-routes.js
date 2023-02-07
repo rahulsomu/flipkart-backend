@@ -4,8 +4,32 @@ import userModel from "../models/user-model.js";
 
 const productRoutes = express.Router();
 productRoutes.get("/allProducts", async (req, res) => {
+  const sort = req.query.sort;
+  console.log(sort);
+  let allProducts;
   try {
-    const allProducts = await productModel.find({});
+    switch (sort && sort) {
+      case "1":
+        allProducts = await productModel
+          .find({})
+          .sort({ "rating.ratings": "desc" });
+        break;
+      case "2":
+        allProducts = await productModel.find({}).sort({ sellingPrice: "asc" });
+        break;
+      case "3":
+        allProducts = await productModel
+          .find({})
+          .sort({ sellingPrice: "desc" });
+        break;
+      case "4":
+        allProducts = await productModel
+          .find({})
+          .sort({ "rating.reviews": "asc" });
+        break;
+      default:
+        allProducts = await productModel.find({});
+    }
 
     res.status(200).json({ data: allProducts });
   } catch (error) {
