@@ -63,5 +63,51 @@ userRoutes.post("/register", async (req, res) => {
     }
   }
 });
+userRoutes.post("/addToWishlist", async (req, res) => {
+  const wishlistItem = req.body;
 
+  console.log("wishlistItem", wishlistItem);
+  try {
+    userModel.findByIdAndUpdate(
+      wishlistItem.userId,
+      {
+        $push: { wishlist: req.body },
+      },
+      (err, result) => {
+        if (err) {
+          console.log("errorrr", err);
+        }
+        res
+          .status(200)
+          .json({ message: "Added to wishlist", data: wishlistItem._id });
+      }
+    );
+  } catch {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+userRoutes.post("/removeFromWishlist", async (req, res) => {
+  const wishlistItem = req.body;
+
+  console.log("wishlistItem", wishlistItem);
+  try {
+    userModel.findByIdAndUpdate(
+      wishlistItem.userId,
+      {
+        $pull: { wishlist: wishlistItem._id },
+      },
+      (err, result) => {
+        if (err) {
+          console.log("errorrr", err);
+        }
+        res
+          .status(200)
+          .json({ message: "Removed from wishlist", data: wishlistItem._id });
+      }
+    );
+  } catch {
+    res.status(500).json({ message: error.message });
+  }
+});
 export default userRoutes;
