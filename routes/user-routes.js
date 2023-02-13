@@ -3,16 +3,12 @@ import userModel from "../models/user-model.js";
 import passwordHash from "password-hash";
 
 const userRoutes = express.Router();
-userRoutes.get("/details", (req, res) => {
-  res.json({ name: "rahul" });
-});
 
 userRoutes.post("/login", async (req, res) => {
   const loginDetails = req.body;
-  console.log(loginDetails);
 
   const userExist = await userModel.find({ email: loginDetails.email });
-  console.log(userExist);
+
   if (userExist.length) {
     if (
       userExist[0].email == loginDetails.email &&
@@ -33,11 +29,22 @@ userRoutes.post("/login", async (req, res) => {
     });
   }
 });
+userRoutes.post("/details", async (req, res) => {
+  try {
+    const user = await userModel.find({ _id: req.body.userId });
+
+    if (user) {
+      res.status(200).json({ userDetails: user });
+    }
+  } catch (error) {
+    res.status(500).json({ message: "User not found" });
+  }
+});
 
 userRoutes.post("/register", async (req, res) => {
   const registrationDetails = req.body;
   var hashedPassword = passwordHash.generate(registrationDetails.password);
-  console.log("hashedPassword", hashedPassword);
+
   const userExist = await (
     await userModel.find({ email: registrationDetails.email })
   ).length;
@@ -66,9 +73,8 @@ userRoutes.post("/register", async (req, res) => {
 userRoutes.post("/addToWishlist", async (req, res) => {
   const wishlistItem = req.body;
 
-  console.log("wishlistItem", wishlistItem);
   try {
-    userModel.findByIdAndUpdate(
+    const result = userModel.findByIdAndUpdate(
       wishlistItem.userId,
       {
         $push: { wishlist: req.body },
@@ -77,9 +83,7 @@ userRoutes.post("/addToWishlist", async (req, res) => {
         if (err) {
           console.log("errorrr", err);
         }
-        res
-          .status(200)
-          .json({ message: "Added to wishlist", data: wishlistItem._id });
+        res.status(200).json({ message: "Added to wishlist", data: result });
       }
     );
   } catch {
@@ -90,12 +94,11 @@ userRoutes.post("/addToWishlist", async (req, res) => {
 userRoutes.post("/removeFromWishlist", async (req, res) => {
   const wishlistItem = req.body;
 
-  console.log("wishlistItem", wishlistItem);
   try {
-    userModel.findByIdAndUpdate(
+    const result = userModel.findByIdAndUpdate(
       wishlistItem.userId,
       {
-        $pull: { wishlist: wishlistItem._id },
+        $pull: { wishlist: { _id: wishlistItem._id } },
       },
       (err, result) => {
         if (err) {

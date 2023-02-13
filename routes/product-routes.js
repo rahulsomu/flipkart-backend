@@ -5,7 +5,7 @@ import userModel from "../models/user-model.js";
 const productRoutes = express.Router();
 productRoutes.get("/allProducts", async (req, res) => {
   const sort = req.query.sort;
-  console.log(sort);
+
   let allProducts;
   try {
     switch (sort && sort) {
@@ -52,9 +52,9 @@ productRoutes.get("/:id", async (req, res) => {
 productRoutes.post("/addItemToCart", async (req, res) => {
   try {
     const product = req.body;
-    console.log(product);
+
     const user = await userModel.find({ _id: product.userId });
-    console.log(user);
+
     const change = userModel.findByIdAndUpdate(
       product.userId,
       {
