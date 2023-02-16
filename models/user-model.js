@@ -27,6 +27,9 @@ const userSchema = new mongoose.Schema({
   orderHistory: {
     type: Array,
   },
+  savedAddresses: {
+    type: Array,
+  },
   cartItems: {
     type: Array,
   },

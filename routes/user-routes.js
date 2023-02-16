@@ -113,4 +113,49 @@ userRoutes.post("/removeFromWishlist", async (req, res) => {
     res.status(500).json({ message: error.message });
   }
 });
+
+userRoutes.post("/saveaddress", async (req, res) => {
+  const {
+    name,
+    phone,
+    pincode,
+    locality,
+    address,
+    city,
+    state,
+    landmark,
+    alternatePhone,
+    addressType,
+    userId,
+  } = req.body;
+  try {
+    const result = userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          savedAddresses: {
+            name,
+            phone,
+            pincode,
+            locality,
+            address,
+            city,
+            state,
+            landmark,
+            alternatePhone,
+            addressType,
+          },
+        },
+      },
+      (err, result) => {
+        if (err) {
+          console.log("errorrr", err);
+        }
+        res.status(200).json({ message: "Address added", data: result });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
 export default userRoutes;
