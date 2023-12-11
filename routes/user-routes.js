@@ -6,9 +6,8 @@ const userRoutes = express.Router();
 
 userRoutes.post("/login", async (req, res) => {
   const loginDetails = req.body;
-
   const userExist = await userModel.find({ email: loginDetails.email });
-
+  console.log(userExist, "i/user");
   if (userExist.length) {
     if (
       userExist[0].email == loginDetails.email &&
@@ -43,6 +42,7 @@ userRoutes.post("/details", async (req, res) => {
 
 userRoutes.post("/register", async (req, res) => {
   const registrationDetails = req.body;
+  console.log(registrationDetails);
   var hashedPassword = passwordHash.generate(registrationDetails.password);
 
   const userExist = await (
@@ -152,6 +152,34 @@ userRoutes.post("/saveaddress", async (req, res) => {
           console.log("errorrr", err);
         }
         res.status(200).json({ message: "Address added", data: result });
+      }
+    );
+  } catch (error) {
+    res.status(500).json({ message: error.message });
+  }
+});
+
+userRoutes.post("/saveOrder", async (req, res) => {
+  const { deliveryAddress, items, paymentOption, subTotal, userId } = req.body;
+  console.log(req.body);
+  try {
+    const result = userModel.findByIdAndUpdate(
+      userId,
+      {
+        $push: {
+          orderHistory: {
+            deliveryAddress,
+            items,
+            paymentOption,
+            subTotal,
+          },
+        },
+      },
+      (err, result) => {
+        if (err) {
+          console.log("errorrr", err);
+        }
+        res.status(200).json({ message: "Order added", data: result });
       }
     );
   } catch (error) {
